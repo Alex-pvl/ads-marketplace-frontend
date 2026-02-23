@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+:root {
+  --accent: #0084ff;
+  --accent-hover: #1689ff;
+  --bg-primary: #000000;
+  --bg-card: #101010;
+  --bg-elevated: #161616;
+  --bg-input: #101010;
+  --text-primary: #ffffff;
+  --text-secondary: #838383;
+  --text-muted: #6c6c6c;
+  --text-placeholder: #6c6c6c;
+  --ton-blue: #35aff1;
+  --green-accent: #99ffe2;
+  --yellow-accent: #ffc300;
+  --border: rgba(255, 255, 255, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  background: #000;
+  font-family: 'Inter', sans-serif;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #111;
+}
+
+.app-shell {
+  width: 390px;
+  height: 844px;
+  background: #000;
+  position: relative;
+  overflow: hidden;
+  border-radius: 32px;
+}
+
+@media (max-height: 850px) {
+  .app-shell {
+    height: 100vh;
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 390px) {
+  .app-shell {
+    width: 100vw;
+    border-radius: 0;
+  }
+}
+
+.scrollable {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scrollable::-webkit-scrollbar {
+  display: none;
+}
+
+.page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.content-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.content-scroll::-webkit-scrollbar {
+  display: none;
+}
