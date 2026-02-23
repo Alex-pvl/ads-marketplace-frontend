@@ -56,7 +56,7 @@ export default function OnboardingPage() {
       </div>
 
       {/* Top content */}
-      <div className="relative z-10 px-4 pt-6">
+      <div className="relative z-10 px-4 pt-6" style={{ position: 'relative', zIndex: 10 }}>
         {/* Step indicators */}
         <div className="flex items-center gap-1.5">
           {onboardingSlides.map((_, i) => (
@@ -74,7 +74,7 @@ export default function OnboardingPage() {
       </div>
 
       {/* Bottom content */}
-      <div className="relative z-10 mt-auto px-4 pb-6 flex flex-col gap-4">
+      <div className="relative z-10 mt-auto px-4 pb-6 flex flex-col gap-4" style={{ position: 'relative', zIndex: 10, marginTop: 'auto' }}>
         <div className="flex flex-col gap-4">
           <h1 style={{ fontSize: 24, fontWeight: 600, color: '#fff', letterSpacing: '-0.48px', lineHeight: '1.2', fontFamily: 'Inter, sans-serif' }}>
             {slide.title}
