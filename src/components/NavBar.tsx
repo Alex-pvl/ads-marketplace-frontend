@@ -1,3 +1,4 @@
+import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 const ACTIVE_COLOR = '#1689ff'
@@ -37,7 +38,7 @@ function ProfileIcon({ color }: { color: string }) {
   )
 }
 
-const tabIcons: Record<string, (props: { color: string }) => JSX.Element> = {
+const tabIcons: Record<string, React.FC<{ color: string }>> = {
   main: DashboardIcon,
   'my-ads': MegaphoneIcon,
   profile: ProfileIcon,
