@@ -1,8 +1,14 @@
-import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react'
+import { useTonConnectUI } from '@tonconnect/ui-react'
 import { useApp } from '../context/AppContext'
+import { useTonBalance } from '../hooks/useTonBalance'
 
 const tonIcon = 'https://www.figma.com/api/mcp/asset/a28063f9-dc1a-426b-a92a-701825e0c0a9'
 const plusIcon = 'https://www.figma.com/api/mcp/asset/f41a4ff2-78f9-44f1-9853-82d803a2ccd5'
+
+function formatBalance(val: number): string {
+  if (val >= 1000) return val.toLocaleString('ru-RU', { maximumFractionDigits: 1 })
+  return val.toLocaleString('ru-RU', { maximumFractionDigits: 2 })
+}
 
 interface HeaderProps {
   showBanner?: boolean
@@ -37,14 +43,10 @@ function SmallAvatar({ name, avatar }: { name: string; avatar: string }) {
 export default function Header({ showBanner = true }: HeaderProps) {
   const { user } = useApp()
   const [tonConnectUI] = useTonConnectUI()
-  const wallet = useTonWallet()
-
-  const isConnected = !!wallet
+  const { balance, loading, connected } = useTonBalance()
 
   const handleWalletClick = () => {
-    if (isConnected) {
-      tonConnectUI.disconnect()
-    } else {
+    if (!connected) {
       tonConnectUI.openModal()
     }
   }
@@ -77,13 +79,13 @@ export default function Header({ showBanner = true }: HeaderProps) {
           onClick={handleWalletClick}
           className="flex items-center gap-1 rounded-full px-2.5 py-2"
           style={{
-            background: isConnected ? 'rgba(0,157,255,0.1)' : 'rgba(255,255,255,0.08)',
+            background: connected ? 'rgba(0,157,255,0.1)' : 'rgba(255,255,255,0.08)',
             height: 36,
             border: 'none',
-            cursor: 'pointer',
+            cursor: connected ? 'default' : 'pointer',
           }}
         >
-          {isConnected ? (
+          {connected ? (
             <>
               <div
                 className="rounded-full overflow-hidden flex-shrink-0"
@@ -92,7 +94,7 @@ export default function Header({ showBanner = true }: HeaderProps) {
                 <img src={tonIcon} alt="TON" className="w-full h-full" style={{ padding: '27% 23% 19% 23%', boxSizing: 'border-box' }} />
               </div>
               <span className="text-white font-bold flex-1" style={{ fontSize: 12, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.24px' }}>
-                Кошелёк
+                {loading && balance === null ? '...' : `${formatBalance(balance ?? 0)} TON`}
               </span>
               <img src={plusIcon} alt="Add" style={{ width: 19, height: 19 }} />
             </>

@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom'
-import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react'
+import { useTonConnectUI } from '@tonconnect/ui-react'
 import NavBar from '../components/NavBar'
 import TonAmount from '../components/TonAmount'
 import { transactions, myChannels } from '../data/mockData'
 import { useApp } from '../context/AppContext'
+import { useTonBalance } from '../hooks/useTonBalance'
 
 const megaphoneIcon = 'https://www.figma.com/api/mcp/asset/99dd1067-532e-43ab-8aee-b1c30f7a3648'
 const verifyIcon = 'https://www.figma.com/api/mcp/asset/1f928ede-4282-4fd4-9986-f92586f1b33f'
@@ -15,9 +16,9 @@ const arrowUpLeft = 'https://www.figma.com/api/mcp/asset/2fce9e51-ff31-4062-b48c
 const historyIcon = 'https://www.figma.com/api/mcp/asset/ccf6a924-4016-4c51-b5e4-200bffef3ac9'
 const minusIcon = 'https://www.figma.com/api/mcp/asset/508f118e-cb00-457c-b413-81815400e474'
 
-function formatAddress(raw: string): string {
-  if (raw.length <= 10) return raw
-  return `${raw.slice(0, 4)}...${raw.slice(-4)}`
+function formatBalance(val: number): string {
+  if (val >= 1000) return val.toLocaleString('ru-RU', { maximumFractionDigits: 1 })
+  return val.toLocaleString('ru-RU', { maximumFractionDigits: 2 })
 }
 
 function UserAvatar({ name, avatar, size = 120 }: { name: string; avatar: string; size?: number }) {
@@ -70,15 +71,10 @@ export default function ProfilePage() {
   const { user } = useApp()
   const navigate = useNavigate()
   const [tonConnectUI] = useTonConnectUI()
-  const wallet = useTonWallet()
-
-  const isConnected = !!wallet
-  const walletAddress = wallet?.account?.address ?? ''
+  const { balance, loading, connected } = useTonBalance()
 
   const handleWalletClick = () => {
-    if (isConnected) {
-      tonConnectUI.disconnect()
-    } else {
+    if (!connected) {
       tonConnectUI.openModal()
     }
   }
@@ -129,14 +125,14 @@ export default function ProfilePage() {
                 onClick={handleWalletClick}
                 className="flex items-center gap-1 rounded-full px-2.5"
                 style={{
-                  background: isConnected ? 'rgba(0,157,255,0.1)' : 'rgba(255,255,255,0.08)',
+                  background: connected ? 'rgba(0,157,255,0.1)' : 'rgba(255,255,255,0.08)',
                   height: 42,
                   minWidth: 144,
                   border: 'none',
-                  cursor: 'pointer',
+                  cursor: connected ? 'default' : 'pointer',
                 }}
               >
-                {isConnected ? (
+                {connected ? (
                   <>
                     <div
                       className="rounded-full overflow-hidden flex-shrink-0"
@@ -145,7 +141,7 @@ export default function ProfilePage() {
                       <img src={tonIconCircle} alt="TON" className="w-full h-full" style={{ padding: '27% 23% 19% 23%', boxSizing: 'border-box' }} />
                     </div>
                     <span className="text-white font-bold flex-1" style={{ fontSize: 14, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.28px' }}>
-                      {formatAddress(walletAddress)}
+                      {loading && balance === null ? '...' : `${formatBalance(balance ?? 0)} TON`}
                     </span>
                     <img src={plusIcon} alt="Add" style={{ width: 19, height: 19 }} />
                   </>

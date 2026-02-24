@@ -83,8 +83,8 @@ export const channels: Channel[] = [
   },
   {
     id: '5',
-    name: 'TonSecurer',
-    username: '@tonsecurer',
+    name: 'TON Daily',
+    username: '@tondaily',
     avatar: 'https://www.figma.com/api/mcp/asset/7ce1a0be-ad2f-46e2-ab47-68ac6be4ec26',
     price: 85,
     subscribers: 45000,
@@ -229,8 +229,8 @@ export const myChannels: Channel[] = [
   },
   {
     id: '2',
-    name: 'TonSecurer',
-    username: '@tonsecurer',
+    name: 'TON Daily',
+    username: '@tondaily',
     avatar: 'https://www.figma.com/api/mcp/asset/7ce1a0be-ad2f-46e2-ab47-68ac6be4ec26',
     price: 85,
     subscribers: 45000,
