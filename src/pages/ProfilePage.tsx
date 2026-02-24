@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom'
+import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react'
 import NavBar from '../components/NavBar'
 import TonAmount from '../components/TonAmount'
 import { transactions, myChannels } from '../data/mockData'
 import { useApp } from '../context/AppContext'
 
 const megaphoneIcon = 'https://www.figma.com/api/mcp/asset/99dd1067-532e-43ab-8aee-b1c30f7a3648'
-const subtractAvatar = 'https://www.figma.com/api/mcp/asset/52b8dbea-117e-4f08-ae42-d87a9e0f87c4'
 const verifyIcon = 'https://www.figma.com/api/mcp/asset/1f928ede-4282-4fd4-9986-f92586f1b33f'
 const tonIconCircle = 'https://www.figma.com/api/mcp/asset/a28063f9-dc1a-426b-a92a-701825e0c0a9'
 const plusIcon = 'https://www.figma.com/api/mcp/asset/384f3d2f-858e-4ae0-85d3-cdcccc2edf7b'
@@ -15,11 +15,74 @@ const arrowUpLeft = 'https://www.figma.com/api/mcp/asset/2fce9e51-ff31-4062-b48c
 const historyIcon = 'https://www.figma.com/api/mcp/asset/ccf6a924-4016-4c51-b5e4-200bffef3ac9'
 const minusIcon = 'https://www.figma.com/api/mcp/asset/508f118e-cb00-457c-b413-81815400e474'
 
+function formatAddress(raw: string): string {
+  if (raw.length <= 10) return raw
+  return `${raw.slice(0, 4)}...${raw.slice(-4)}`
+}
+
+function UserAvatar({ name, avatar, size = 120 }: { name: string; avatar: string; size?: number }) {
+  if (avatar) {
+    return (
+      <img
+        src={avatar}
+        alt={name}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+    )
+  }
+
+  const initials = name
+    .split(' ')
+    .map(w => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+
+  const hue = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360
+
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        background: `hsl(${hue}, 50%, 45%)`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <span
+        style={{
+          color: '#fff',
+          fontSize: size * 0.36,
+          fontWeight: 700,
+          fontFamily: 'Inter, sans-serif',
+          letterSpacing: '-0.5px',
+        }}
+      >
+        {initials}
+      </span>
+    </div>
+  )
+}
+
 export default function ProfilePage() {
   const { user } = useApp()
   const navigate = useNavigate()
+  const [tonConnectUI] = useTonConnectUI()
+  const wallet = useTonWallet()
 
-  // Group transactions by date
+  const isConnected = !!wallet
+  const walletAddress = wallet?.account?.address ?? ''
+
+  const handleWalletClick = () => {
+    if (isConnected) {
+      tonConnectUI.disconnect()
+    } else {
+      tonConnectUI.openModal()
+    }
+  }
+
   const grouped = transactions.reduce((acc, tx) => {
     if (!acc[tx.date]) acc[tx.date] = []
     acc[tx.date].push(tx)
@@ -48,11 +111,7 @@ export default function ProfilePage() {
               </div>
               {/* Avatar */}
               <div style={{ width: 120, height: 120, borderRadius: '50%', overflow: 'hidden' }}>
-                <img
-                  src={subtractAvatar}
-                  alt={user.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
+                <UserAvatar name={user.name} avatar={user.avatar} size={120} />
               </div>
             </div>
 
@@ -60,27 +119,42 @@ export default function ProfilePage() {
             <div className="flex flex-col items-center gap-3.5">
               <div className="flex items-center gap-1.5">
                 <span className="text-white font-semibold" style={{ fontSize: 20, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.4px' }}>
-                  Roxman
+                  {user.name}
                 </span>
                 <img src={verifyIcon} alt="verified" style={{ width: 13.6, height: 13.6 }} />
               </div>
 
-              {/* Balance */}
-              <div
+              {/* Wallet / Balance */}
+              <button
+                onClick={handleWalletClick}
                 className="flex items-center gap-1 rounded-full px-2.5"
-                style={{ background: 'rgba(0,157,255,0.1)', height: 42, minWidth: 144 }}
+                style={{
+                  background: isConnected ? 'rgba(0,157,255,0.1)' : 'rgba(255,255,255,0.08)',
+                  height: 42,
+                  minWidth: 144,
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
               >
-                <div
-                  className="rounded-full overflow-hidden flex-shrink-0"
-                  style={{ width: 18, height: 18, background: '#35aff1' }}
-                >
-                  <img src={tonIconCircle} alt="TON" className="w-full h-full" style={{ padding: '27% 23% 19% 23%', boxSizing: 'border-box' }} />
-                </div>
-                <span className="text-white font-bold flex-1" style={{ fontSize: 14, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.28px' }}>
-                  320 TON
-                </span>
-                <img src={plusIcon} alt="Add" style={{ width: 19, height: 19 }} />
-              </div>
+                {isConnected ? (
+                  <>
+                    <div
+                      className="rounded-full overflow-hidden flex-shrink-0"
+                      style={{ width: 18, height: 18, background: '#35aff1' }}
+                    >
+                      <img src={tonIconCircle} alt="TON" className="w-full h-full" style={{ padding: '27% 23% 19% 23%', boxSizing: 'border-box' }} />
+                    </div>
+                    <span className="text-white font-bold flex-1" style={{ fontSize: 14, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.28px' }}>
+                      {formatAddress(walletAddress)}
+                    </span>
+                    <img src={plusIcon} alt="Add" style={{ width: 19, height: 19 }} />
+                  </>
+                ) : (
+                  <span className="text-white font-bold" style={{ fontSize: 14, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.28px', padding: '0 8px' }}>
+                    Подключить кошелёк
+                  </span>
+                )}
+              </button>
             </div>
           </div>
 
