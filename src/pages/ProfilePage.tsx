@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTonConnectUI } from '@tonconnect/ui-react'
 import NavBar from '../components/NavBar'
@@ -73,9 +74,25 @@ export default function ProfilePage() {
   const [tonConnectUI] = useTonConnectUI()
   const { balance, loading, connected } = useTonBalance()
 
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const handleWalletClick = () => {
     if (!connected) {
       tonConnectUI.openModal()
+    }
+  }
+
+  const handlePointerDown = () => {
+    if (!connected) return
+    longPressTimer.current = setTimeout(() => {
+      tonConnectUI.disconnect()
+    }, 600)
+  }
+
+  const handlePointerUp = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
     }
   }
 
@@ -123,13 +140,16 @@ export default function ProfilePage() {
               {/* Wallet / Balance */}
               <button
                 onClick={handleWalletClick}
+                onPointerDown={handlePointerDown}
+                onPointerUp={handlePointerUp}
+                onPointerLeave={handlePointerUp}
                 className="flex items-center gap-1 rounded-full px-2.5"
                 style={{
                   background: connected ? 'rgba(0,157,255,0.1)' : 'rgba(255,255,255,0.08)',
                   height: 42,
                   minWidth: 144,
                   border: 'none',
-                  cursor: connected ? 'default' : 'pointer',
+                  cursor: 'pointer',
                 }}
               >
                 {connected ? (

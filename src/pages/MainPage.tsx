@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Header from '../components/Header'
 import NavBar from '../components/NavBar'
 import ChannelCard from '../components/ChannelCard'
@@ -12,10 +12,33 @@ const megaphoneSmIcon = 'https://www.figma.com/api/mcp/asset/5e93a36e-3d36-42b2-
 
 type FilterType = 'verified' | 'popular' | 'adv'
 
+const SORT_OPTIONS = [
+  { key: 'price', label: 'Цена' },
+  { key: 'subscribers', label: 'Подписчики' },
+  { key: 'avgReach', label: 'Охват' },
+] as const
+
+type SortKey = typeof SORT_OPTIONS[number]['key']
+
 export default function MainPage() {
   const [search, setSearch] = useState('')
   const [activeFilter, setActiveFilter] = useState<FilterType>('verified')
-  const [sortDesc, setSortDesc] = useState(false)
+  const [sortKey, setSortKey] = useState<SortKey>('price')
+  const [sortAsc, setSortAsc] = useState(true)
+  const [sortOpen, setSortOpen] = useState(false)
+  const sortRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handler = (e: PointerEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setSortOpen(false)
+      }
+    }
+    if (sortOpen) document.addEventListener('pointerdown', handler)
+    return () => document.removeEventListener('pointerdown', handler)
+  }, [sortOpen])
+
+  const sortLabel = SORT_OPTIONS.find(o => o.key === sortKey)!.label
 
   const filtered = channels.filter(ch => {
     const matchSearch = search === '' ||
@@ -27,7 +50,11 @@ export default function MainPage() {
         ? ch.subscribers > 100000
         : true
     return matchSearch && matchFilter
-  }).sort((a, b) => sortDesc ? b.price - a.price : a.price - b.price)
+  }).sort((a, b) => {
+    const av = a[sortKey]
+    const bv = b[sortKey]
+    return sortAsc ? (av as number) - (bv as number) : (bv as number) - (av as number)
+  })
 
   return (
     <div className="page">
@@ -65,25 +92,81 @@ export default function MainPage() {
                 />
               </div>
               {/* Sort */}
-              <button
-                className="flex flex-col justify-center rounded-xl px-2.5"
-                style={{ background: '#101010', height: 42, minWidth: 113 }}
-                onClick={() => setSortDesc(!sortDesc)}
-              >
-                <span className="font-semibold" style={{ fontSize: 10, color: '#6c6c6c', fontFamily: 'Inter, sans-serif' }}>
-                  Сортировать по
-                </span>
-                <div className="flex items-center gap-1">
-                  <span className="text-white font-semibold" style={{ fontSize: 12, fontFamily: 'Inter, sans-serif' }}>
-                    Цена
+              <div ref={sortRef} style={{ position: 'relative' }}>
+                <button
+                  className="flex flex-col justify-center rounded-xl px-2.5"
+                  style={{ background: '#101010', height: 42, minWidth: 113 }}
+                  onClick={() => setSortOpen(prev => !prev)}
+                >
+                  <span className="font-semibold text-left" style={{ fontSize: 10, color: '#6c6c6c', fontFamily: 'Inter, sans-serif', lineHeight: '14px' }}>
+                    Сортировать по
                   </span>
-                  <img
-                    src={sortIcon}
-                    alt="sort"
-                    style={{ width: 12, height: 12, transform: sortDesc ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
-                  />
-                </div>
-              </button>
+                  <div className="flex items-center gap-1">
+                    <span className="text-white font-semibold" style={{ fontSize: 12, fontFamily: 'Inter, sans-serif', lineHeight: '16px' }}>
+                      {sortLabel}
+                    </span>
+                    <img
+                      src={sortIcon}
+                      alt="sort"
+                      style={{ width: 12, height: 12, transform: sortAsc ? 'none' : 'rotate(180deg)', transition: 'transform 0.2s' }}
+                    />
+                  </div>
+                </button>
+
+                {sortOpen && (
+                  <div
+                    className="absolute right-0 rounded-2xl overflow-hidden z-50"
+                    style={{
+                      top: 'calc(100% + 6px)',
+                      background: '#1a1a1a',
+                      minWidth: 180,
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                    }}
+                  >
+                    {SORT_OPTIONS.map(opt => {
+                      const isActive = sortKey === opt.key
+                      return (
+                        <button
+                          key={opt.key}
+                          className="flex items-center justify-between w-full px-3.5"
+                          style={{
+                            height: 44,
+                            background: isActive ? 'rgba(0,132,255,0.1)' : 'transparent',
+                          }}
+                          onClick={() => {
+                            if (isActive) {
+                              setSortAsc(prev => !prev)
+                            } else {
+                              setSortKey(opt.key)
+                              setSortAsc(true)
+                            }
+                            setSortOpen(false)
+                          }}
+                        >
+                          <span
+                            className="font-semibold"
+                            style={{
+                              fontSize: 14,
+                              color: isActive ? '#fff' : '#6c6c6c',
+                              fontFamily: 'Inter, sans-serif',
+                              letterSpacing: '-0.28px',
+                            }}
+                          >
+                            {opt.label}
+                          </span>
+                          {isActive && (
+                            <img
+                              src={sortIcon}
+                              alt="sort"
+                              style={{ width: 14, height: 14, transform: sortAsc ? 'none' : 'rotate(180deg)', transition: 'transform 0.2s' }}
+                            />
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Filter chips */}

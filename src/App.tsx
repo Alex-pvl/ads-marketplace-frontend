@@ -11,8 +11,10 @@ import LandingPage from './pages/LandingPage'
 import { AppProvider } from './context/AppContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
+const DEV_MODE = import.meta.env.DEV && new URLSearchParams(window.location.search).has('dev')
+
 const isTelegramWebApp =
-  !!window.Telegram?.WebApp?.initData && window.Telegram.WebApp.initData.length > 0
+  DEV_MODE || (!!window.Telegram?.WebApp?.initData && window.Telegram.WebApp.initData.length > 0)
 
 const manifestUrl = new URL('/tonconnect-manifest.json', window.location.origin).toString()
 
