@@ -9,6 +9,7 @@ import MyAdsPostPage from './pages/MyAdsPostPage'
 import MyChannelsPage from './pages/MyChannelsPage'
 import LandingPage from './pages/LandingPage'
 import { AppProvider } from './context/AppContext'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 const isTelegramWebApp =
   !!window.Telegram?.WebApp?.initData && window.Telegram.WebApp.initData.length > 0
@@ -21,23 +22,25 @@ export default function App() {
   }
 
   return (
-    <TonConnectUIProvider manifestUrl={manifestUrl}>
-      <AppProvider>
-        <div className="app-shell">
-          <HashRouter>
-            <Routes>
-              <Route path="/" element={<Navigate to="/onboarding" replace />} />
-              <Route path="/onboarding" element={<OnboardingPage />} />
-              <Route path="/main" element={<MainPage />} />
-              <Route path="/my-ads" element={<MyAdsPage />} />
-              <Route path="/my-ads/:id" element={<MyAdsPostPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/channels" element={<MyChannelsPage />} />
-              <Route path="/channels/:id" element={<ChannelStatsPage />} />
-            </Routes>
-          </HashRouter>
-        </div>
-      </AppProvider>
-    </TonConnectUIProvider>
+    <ErrorBoundary>
+      <TonConnectUIProvider manifestUrl={manifestUrl}>
+        <AppProvider>
+          <div className="app-shell">
+            <HashRouter>
+              <Routes>
+                <Route path="/" element={<Navigate to="/onboarding" replace />} />
+                <Route path="/onboarding" element={<OnboardingPage />} />
+                <Route path="/main" element={<MainPage />} />
+                <Route path="/my-ads" element={<MyAdsPage />} />
+                <Route path="/my-ads/:id" element={<MyAdsPostPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/channels" element={<MyChannelsPage />} />
+                <Route path="/channels/:id" element={<ChannelStatsPage />} />
+              </Routes>
+            </HashRouter>
+          </div>
+        </AppProvider>
+      </TonConnectUIProvider>
+    </ErrorBoundary>
   )
 }
