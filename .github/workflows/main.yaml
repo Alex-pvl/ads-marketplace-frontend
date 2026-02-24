@@ -30,9 +30,9 @@ jobs:
             nvm use 22
             npm i
             npm run build
-            sudo rm -rf /var/www/pavlyuk.tech/dist/
-            sudo mv dist/ /var/www/pavlyuk.tech/
-            sudo nginx -t && sudo nginx -s reload
+            echo '${{ secrets.SERVER_PASSWORD }}' | sudo -S rm -rf /var/www/pavlyuk.tech/dist/
+            echo '${{ secrets.SERVER_PASSWORD }}' | sudo -S mv dist/ /var/www/pavlyuk.tech/
+            echo '${{ secrets.SERVER_PASSWORD }}' | sudo -S nginx -t && echo '${{ secrets.SERVER_PASSWORD }}' | sudo -S nginx -s reload
       
 permissions:
   contents: write
