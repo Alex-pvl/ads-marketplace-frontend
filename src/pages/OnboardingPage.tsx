@@ -475,7 +475,7 @@ export default function OnboardingPage() {
       {/* Phone mockup area */}
       <div
         className="relative flex justify-center"
-        style={{ zIndex: 2, marginTop: 16, flex: '0 0 auto' }}
+        style={{ zIndex: 2, marginTop: 48, flex: '0 0 auto' }}
       >
         <PhoneMockup />
       </div>
